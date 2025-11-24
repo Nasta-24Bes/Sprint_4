@@ -1,25 +1,20 @@
 package tests;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openqa.selenium.WebDriver;
 import pages.MainPage;
 import pages.OrderForm;
+import utils.Constants;
 import utils.WebDriverFactory;
 
-import java.time.Duration;
-
 import static org.junit.Assert.assertTrue;
-import static utils.Constants.*;
 
 @RunWith(Parameterized.class)
-public class OrderTest {
+public class OrderTest extends BaseTest {
+
     private MainPage mainPage;
     private OrderForm orderForm;
-    private WebDriver webDriver;
     private final String orderButtonType;
     private final String name;
     private final String surname;
@@ -46,38 +41,33 @@ public class OrderTest {
         this.comment = comment;
     }
 
-    //Выбор браузера и запуск главной страницы
-    @Before
-    public void startUp() {
-        webDriver = WebDriverFactory.createWebDriver();
-        webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15));
-        webDriver.manage().window().maximize();
-        webDriver.get(MAIN_URL);
+    @org.junit.Before
+    public void setUpTest() {
+        webDriver.get(Constants.MAIN_URL);
         mainPage = new MainPage(webDriver);
         orderForm = new OrderForm(webDriver);
     }
-    //Параметризация наборов тестовых данных
-    @Parameterized.Parameters
+
+    @Parameterized.Parameters(name = "Тест {index}: {0} {1} {2}")
     public static Object[][] data() {
         return new Object[][]{
                 {
-                        "upper",
+                        "верхняя кнопка",
                         "Иван", "Иванов", "ул. Потапова д 1", "Кожуховская", "89999999999",
                         "30.11.25", "трое суток", new String[]{"black"}, "позвонить заранее"
                 },
                 {
-                        "down",
+                        "нижняя кнопка",
                         "Вася", "Васильев", "ул. Анкина д 12", "Аннино", "89888888888",
                         "25.11.25", "двое суток", new String[]{"grey"}, "скорее"
                 }
         };
     }
 
-    //Тест с выбором кнопки и тестовыми данными
     @Test
     public void orderFormTest() {
         mainPage.acceptCookiesIfNeeded();
-        if ("upper".equals(orderButtonType)) {
+        if ("верхняя кнопка".equals(orderButtonType)) {
             mainPage.clickUpperOrderButton();
         } else {
             mainPage.clickDownOrderButton();
@@ -90,14 +80,4 @@ public class OrderTest {
         orderForm.conformOrder();
         assertTrue("Окно о создании заказа не появилось", orderForm.isCheckOrderCompletePopupDisplayed());
     }
-
-    //Закрытие браузера
-    @After
-    public void tearDown() {
-
-        if (webDriver != null) {
-            webDriver.quit();
-        }
-    }
-
 }
